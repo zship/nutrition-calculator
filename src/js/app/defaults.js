@@ -1,0 +1,43 @@
+define(function() {
+
+	return {
+		title: '--',
+		url: '',
+		serving: 0,
+		protein: 0,
+		fat: 0,
+		omega3: 0,
+		omega6: 0,
+		carbohydrate: 0,
+		fiber: 0,
+		a: 0,
+		thiamin: 0,
+		riboflavin: 0,
+		niacin: 0,
+		b6: 0,
+		b12: 0,
+		folate: 0,
+		pantothenic: 0,
+		biotin: 0,
+		choline: 0,
+		c: 0,
+		d: 0,
+		e: 0,
+		k: 0,
+		calcium: 0,
+		chromium: 0,
+		copper: 0,
+		flouride: 0,
+		iodine: 0,
+		iron: 0,
+		magnesium: 0,
+		manganese: 0,
+		molybdenum: 0,
+		phosphorus: 0,
+		potassium: 0,
+		selenium: 0,
+		sodium: 0,
+		zinc: 0
+	};
+
+});

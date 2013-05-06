@@ -1,0 +1,56 @@
+body {
+	font-family: 'Open Sans';
+}
+
+th, td {
+	white-space: nowrap;
+	padding: 5px 10px;
+}
+
+th {
+	font-weight: 600;
+}
+
+thead {
+	background: rgba(0, 0, 0, 0.8);
+	color: #efefef;
+}
+
+tbody {
+	color: #555;
+
+	tr:nth-child(even) {
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	td:nth-child(even) {
+		background: rgba(0, 0, 0, 0.03);
+	}
+}
+
+tbody, tfoot {
+	td.low {
+		background: rgba(255, 0, 0, 0.2);
+	}
+
+	td.mid {
+		background: rgba(255, 255, 0, 0.2);
+	}
+
+	td.high {
+		background: rgba(255, 0, 0, 0.4);
+	}
+
+	tr.rdi td.low {
+		color: rgb(255, 0, 0);
+	}
+
+	tr.ul td.high {
+		color: rgb(255, 0, 0);
+	}
+}
+
+tfoot {
+	border-top: 1px solid #999;
+	border-bottom: 1px solid #555;
+}

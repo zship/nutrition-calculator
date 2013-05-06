@@ -1,0 +1,99 @@
+mixin nutrientRow(obj, title)
+	if title
+		td= title
+	else
+		td
+			a(href=obj.url)= obj.title
+	td.serving= obj.serving
+	td.adjust
+		input(type='text', value=obj.adjusted)
+	td
+	td.protein= obj.protein
+	td.fat= obj.fat
+	td.omega3= obj.omega3
+	td.omega6= obj.omega6
+	td.carbohydrate= obj.carbohydrate
+	td.fiber= obj.fiber
+	td.a= obj.a
+	td.thiamin= obj.thiamin
+	td.riboflavin= obj.riboflavin
+	td.niacin= obj.niacin
+	td.b6= obj.b6
+	td.b12= obj.b12
+	td.folate= obj.folate
+	td.pantothenic= obj.pantothenic
+	td.biotin= obj.biotin
+	td.choline= obj.choline
+	td.c= obj.c
+	td.d= obj.d
+	td.e= obj.e
+	td.k= obj.k
+	td.calcium= obj.calcium
+	td.chromium= obj.chromium
+	td.copper= obj.copper
+	td.flouride= obj.flouride
+	td.iodine= obj.iodine
+	td.iron= obj.iron
+	td.magnesium= obj.magnesium
+	td.manganese= obj.manganese
+	td.molybdenum= obj.molybdenum
+	td.phosphorus= obj.phosphorus
+	td.potassium= obj.potassium
+	td.selenium= obj.selenium
+	td.sodium= obj.sodium
+	td.zinc= obj.zinc
+
+table
+	thead
+		tr
+			th Item
+			th Serving
+			th Adjust
+			th Calories
+			th Protein
+			th Fat
+			th &omega;-6
+			th &omega;-3
+			th Carbs
+			th Fiber
+			th Vitamin A
+			th Thiamin
+			th Riboflavin
+			th Niacin
+			th Vitamin B6
+			th Vitamin B12
+			th Folate
+			th Pantothenic
+			th Biotin
+			th Choline
+			th Vitamin C
+			th Vitamin D
+			th Vitamin E
+			th Vitamin K
+			th Calcium
+			th Chromium
+			th Copper
+			th Flouride
+			th Iodine
+			th Iron
+			th Magnesium
+			th Manganese
+			th Molybdenum
+			th Phosphorus
+			th Potassium
+			th Selenium
+			th Sodium
+			th Zinc
+	tbody
+		each prod in products
+			tr(data-prod=prod.id)
+				mixin nutrientRow(prod)
+	tfoot
+		tr.total
+			mixin nutrientRow(total, 'Total')
+		tr.delta
+			mixin nutrientRow(delta, '+/- RDI')
+		tr.rdi
+			mixin nutrientRow(rdi, 'RDI')
+		tr.ul
+			mixin nutrientRow(ul, 'UL')

@@ -1,0 +1,19 @@
+{
+	"name": "nutrition-calculator",
+	"title": "nutrition",
+	"description": "Nutrition calculator",
+	"version": "0.1.0",
+	"author": "Zach Shipley <zach@zachshipley.com>",
+	"license": "MIT",
+	"dependencies": {
+		"mout": "0.3.x",
+		"jade": "0.27.x"
+	},
+	"devDependencies": {
+		"grunt": "0.4.x",
+		"express": "3.1.x",
+		"json-lint": "0.1.x",
+		"connect": "2.4.4"
+	},
+	"keywords": []
+}
