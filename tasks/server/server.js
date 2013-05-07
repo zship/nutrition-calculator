@@ -94,7 +94,7 @@ module.exports = function(grunt) {
     base = grunt.config('server.base'),
     port = grunt.config('server.port'),
     server = startServer({
-        host: '',
+        host: 'www.amazon.com',
         hourMs: 0*60*60,
         vhost: vhost,
         base: base,
