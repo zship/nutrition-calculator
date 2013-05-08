@@ -64,6 +64,8 @@ define(function(require) {
 					return n * ratio;
 				});
 
+				prod.nutrients.calories = prod.nutrients.protein * 4 + prod.nutrients.carbohydrate * 4 + prod.nutrients.fat * 9;
+
 				return prod;
 			});
 

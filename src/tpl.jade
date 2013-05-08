@@ -11,12 +11,12 @@ mixin nutrientRow(obj, title)
 	td.size= obj.size
 	td.servingsPerUnit= obj.servingsPerUnit
 	td.pricePerServing= obj.pricePerServing
-	td
+	td.calories= obj.calories
 	td.protein= obj.protein
+	td.carbohydrate= obj.carbohydrate
 	td.fat= obj.fat
 	td.omega3= obj.omega3
 	td.omega6= obj.omega6
-	td.carbohydrate= obj.carbohydrate
 	td.fiber= obj.fiber
 	td.a= obj.a
 	td.thiamin= obj.thiamin
@@ -59,10 +59,10 @@ table
 			th Price/Serving
 			th Calories
 			th Protein
+			th Carbs
 			th Fat
 			th &omega;-6
 			th &omega;-3
-			th Carbs
 			th Fiber
 			th Vitamin A
 			th Thiamin
