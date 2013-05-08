@@ -1,9 +1,6 @@
 define(function() {
 
 	return {
-		title: '--',
-		url: '',
-		serving: 0,
 		protein: 0,
 		fat: 0,
 		omega3: 0,

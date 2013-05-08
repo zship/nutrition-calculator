@@ -43,8 +43,10 @@ define(function(require) {
 		],
 		volume: [
 			'fl oz',
+			/cup(s)*/,
 			'tsp',
 			'tbsp',
+			/scoop(s)*/,
 			_rSiPrefixes('L'),
 		]
 	};
@@ -95,7 +97,7 @@ define(function(require) {
 			);
 		}
 
-		var matches = str.match(/^([\d\.]+)\s*([a-zA-Z%\s]+)/);
+		var matches = str.match(/^([\d\.\/]+)\s*([a-zA-Z%\s]+)/);
 		if (!matches) {
 			return;
 		}
@@ -146,6 +148,10 @@ define(function(require) {
 				qty *= 29.5735;
 				unit = 'mL';
 				break;
+			case 'cup':
+				qty *= 236.588;
+				unit = 'mL';
+				break;
 			case 'tsp':
 				qty *= 4.92892;
 				unit = 'mL';
@@ -164,6 +170,40 @@ define(function(require) {
 		unit = baseUnit;
 
 		return new Measurement(qty, unit);
+	};
+
+
+	function _log10(x) {
+		return Math.log(x) / Math.log(10);
+	}
+
+
+	Measurement.prototype.format = function() {
+		if (['g', 'L'].indexOf(this.unit) === -1) {
+			return this.qty + ' ' + this.unit;
+		}
+
+		var magnitude = _log10(this.qty);
+		var sign = magnitude < 0 ? -1 : 1;
+		if (magnitude > 0 && magnitude < 3) {
+			magnitude = 0;
+		}
+		magnitude = Math.abs(magnitude);
+		var nearest = Math.ceil(magnitude / 3) * 3;
+
+		var qty = this.qty * Math.pow(10, -1 * sign * nearest);
+		qty = qty.toFixed(1);
+		if (qty.charAt(qty.length - 1) === '0') {
+			qty = qty.replace(/\.\d+/, '');
+		}
+
+		var prefix = '';
+		forOwn(_siPrefixes, function(val, key) {
+			if (val === sign * nearest) {
+				prefix = key;
+			}
+		});
+		return qty + ' ' + prefix + this.unit;
 	};
 
 

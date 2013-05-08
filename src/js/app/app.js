@@ -2,67 +2,88 @@ define(function(require) {
 
 	var $ = require('jquery');
 	var jade = require('jade');
+	var forOwn = require('mout/object/forOwn');
+	var isString = require('mout/lang/isString');
+	var isNumber = require('mout/lang/isNumber');
 	var map = require('mout/object/map');
-	var deepClone = require('mout/lang/deepClone');
+	var reduce = require('mout/object/reduce');
 
-	var PhysicalQuantity = require('./PhysicalQuantity');
-	var Nutrient = require('./Nutrient');
+	var Measurement = require('./Measurement');
 	var products = require('./products');
 	var rdi = require('./rdi');
 
 
 	var tpl;
 
-	var redraw = function() {
+	var draw = function() {
 		var adjusted = products
 			.map(function(prod) {
 				var entered = $('tr[data-prod="' + prod.id + '"]').find('.adjust input').val();
 				if (!entered) {
 					return prod;
 				}
-				prod.adjusted = PhysicalQuantity.parse(entered);
+				prod.serving.adjusted = Measurement.parse(entered);
 				return prod;
 			})
 			.map(function(prod) {
-				if (!prod.adjusted) {
-					return prod;
+				if (!prod.serving.adjusted) {
+					prod.serving.adjusted = prod.serving.serving[0];
 				}
 
-				var ratio;
-
-				if (prod.adjusted.unit === 'pill') {
-					ratio = prod.adjusted.qty / prod.serving.qty;
-				}
-				else {
-					ratio = prod.adjusted.asGrams() / prod.serving.asGrams();
-				}
-
-				return map(prod, function(nutrient) {
-					if (nutrient.constructor === Nutrient) {
-						return new Nutrient(nutrient.name, nutrient.qty * ratio + 'g');
+				var servingsPerUnit;
+				//requested serving size type (volume or mass) matches product
+				//size type, so they're directly comparable
+				if (prod.serving.size.type === prod.serving.adjusted.type) {
+					try {
+						servingsPerUnit = prod.serving.size.toSiBaseUnit().qty / prod.serving.adjusted.toSiBaseUnit().qty;
 					}
-					return nutrient;
+					//could not be converted to SI ("unit" pill)
+					catch(e) {
+						servingsPerUnit = prod.serving.size.qty / prod.serving.adjusted.qty;
+					}
+				}
+				//else, use (volume serving size) / (mass serving size)
+				else if (
+					(prod.serving.adjusted.type === prod.serving.serving[0].type)
+					&&
+					(prod.serving.size.type === prod.serving.serving[1].type)
+				) {
+					var volumeToWeight = 1;
+					if (prod.serving.serving.length === 2) {
+						volumeToWeight = prod.serving.serving[1].toSiBaseUnit().qty / prod.serving.serving[0].qty;
+					}
+					servingsPerUnit = prod.serving.size.toSiBaseUnit().qty / (prod.serving.adjusted.qty * volumeToWeight);
+				}
+				prod.serving.servingsPerUnit = servingsPerUnit;
+				prod.serving.pricePerServing = '$' + (parseFloat(prod.meta.price.replace(/\$/, ''), 10) / servingsPerUnit).toFixed(2);
+
+
+				var ratio = prod.serving.adjusted.qty / prod.serving.serving[0].qty;
+
+				prod.nutrients = map(prod.nutrients, function(n) {
+					return n * ratio;
 				});
+
+				return prod;
 			});
 
-		var total = adjusted.reduce(function(memo, prod) {
-			return map(prod, function(nutrient, key) {
-				if (nutrient.constructor === Nutrient || nutrient.constructor === PhysicalQuantity) {
-					return nutrient.add(memo[key]);
-				}
-				return '';
+		var total = reduce(adjusted, function(memo, prod) {
+			var ret = {};
+			forOwn(prod.nutrients, function(nutrient, key) {
+				ret[key] = nutrient + (memo[key] || 0);
 			});
+			ret.pricePerServing = parseFloat(prod.serving.pricePerServing.replace(/\$/,''), 10) + (memo.pricePerServing || 0);
+			return ret;
 		}, {});
 
+		total.pricePerServing = '$' + total.pricePerServing.toFixed(2);
+
 		var errors = map(total, function(nutrient, key) {
-			if (['title', 'url', 'serving'].indexOf(key) !== -1) {
-				return false;
-			}
 			if (!rdi[key]) {
 				return false;
 			}
 
-			if (nutrient.qty < new Nutrient(key, rdi[key].rdi.qty + rdi[key].rdi.unit).qty) {
+			if (nutrient < rdi[key].rdi) {
 				return 'low';
 			}
 			/*
@@ -70,68 +91,83 @@ define(function(require) {
 			 *    return 'mid';
 			 *}
 			 */
-			if (rdi[key].ul && nutrient.qty > new Nutrient(key, rdi[key].ul.qty + rdi[key].ul.unit).qty) {
+			if (rdi[key].ul && nutrient > rdi[key].ul) {
 				return 'high';
 			}
 		});
 
 
 		var doFormat = function(obj) {
-			if (obj.constructor === PhysicalQuantity) {
-				if (obj.qty === 0) {
-					return '-';
-				}
-				return obj.format();
-			}
-			if (obj.constructor === Nutrient) {
-				if (obj.qty === 0) {
-					return '-';
-				}
-				return obj.format();
+			if (isString(obj)) {
+				return obj;
 			}
 			if (obj === 0) {
 				return '-';
 			}
-			return obj;
+			if (obj.constructor === Measurement) {
+				return obj.format();
+			}
+			if (isNumber(obj)) {
+				return obj.toFixed(1);
+			}
+			return new Measurement(obj, 'g').format();
 		};
 
 
 		var delta = map(total, function(nutrient, key) {
-			if (nutrient.constructor !== Nutrient) {
-				return false;
-			}
-
 			if (!rdi[key]) {
-				return false;
-			}
-
-			var d = nutrient.qty - new Nutrient(key, rdi[key].rdi.qty + rdi[key].rdi.unit).qty;
-			var sign = (d < 0) ? '-' : '+';
-			return sign + (new Nutrient(key, Math.abs(d) + 'g')).format();
-		});
-
-
-		var formatted = {};
-		formatted.adjusted = adjusted.map(function(prod) {
-			return map(prod, doFormat);
-		});
-		formatted.total = map(total, doFormat);
-		formatted.rdi = map(rdi, function(obj, key) {
-			return doFormat(obj.rdi, key);
-		});
-		formatted.ul = map(rdi, function(obj, key) {
-			if (!obj.ul) {
 				return '';
 			}
-			return doFormat(obj.ul, key);
+
+			var d = nutrient - rdi[key].rdi;
+			var sign = (d < 0) ? '-' : '+';
+			return sign + (new Measurement(Math.abs(d), 'g')).format();
+		});
+
+
+		var flattened = map(adjusted, function(prod) {
+			var ret = {};
+			ret.id = prod.id;
+			forOwn(prod, function(section, sectionKey) {
+				forOwn(section, function(val, key) {
+					if (!val) {
+						ret[key] = '-';
+					}
+					else if (sectionKey === 'nutrients') {
+						ret[key] = doFormat(new Measurement(val, 'g'));
+					}
+					else if (sectionKey === 'serving') {
+						if (key === 'serving') {
+							ret[key] = val[0].format();
+							if (val[1]) {
+								ret[key] += ' (' + val[1].format() + ')';
+							}
+						}
+						else {
+							ret[key] = doFormat(val);
+						}
+					}
+					else {
+						ret[key] = val;
+					}
+				});
+			});
+			return ret;
 		});
 
 
 		var html = tpl({
-			products: formatted.adjusted,
-			rdi: formatted.rdi,
-			ul: formatted.ul,
-			total: formatted.total,
+			products: flattened,
+			rdi: map(rdi, function(obj, key) {
+				return doFormat(obj.rdi, key);
+			}),
+			ul: map(rdi, function(obj, key) {
+				if (!obj.ul) {
+					return '';
+				}
+				return doFormat(obj.ul, key);
+			}),
+			total: map(total, doFormat),
 			delta: delta,
 			errors: errors
 		});
@@ -145,7 +181,7 @@ define(function(require) {
 		});
 
 		$('.adjust input').on('change', function() {
-			redraw();
+			draw();
 		});
 	};
 
@@ -156,7 +192,7 @@ define(function(require) {
 		dataType: 'text'
 	}).then(function(response) {
 		tpl = jade.compile(response);
-		redraw();
+		draw();
 	});
 
 });

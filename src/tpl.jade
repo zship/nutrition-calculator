@@ -7,6 +7,10 @@ mixin nutrientRow(obj, title)
 	td.serving= obj.serving
 	td.adjust
 		input(type='text', value=obj.adjusted)
+	td.price= obj.price
+	td.size= obj.size
+	td.servingsPerUnit= obj.servingsPerUnit
+	td.pricePerServing= obj.pricePerServing
 	td
 	td.protein= obj.protein
 	td.fat= obj.fat
@@ -49,6 +53,10 @@ table
 			th Item
 			th Serving
 			th Adjust
+			th Price
+			th Size
+			th Servings/Unit
+			th Price/Serving
 			th Calories
 			th Protein
 			th Fat

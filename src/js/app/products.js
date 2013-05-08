@@ -2,11 +2,14 @@ define(function(require) {
 
 	//var $ = require('jquery');
 	var mixin = require('mout/object/mixIn');
+	var forOwn = require('mout/object/forOwn');
 	var map = require('mout/object/map');
+	var filter = require('mout/object/filter');
+	var isString = require('mout/lang/isString');
 
 	var defaults = require('./defaults');
-	var PhysicalQuantity = require('./PhysicalQuantity');
-	var Nutrient = require('./Nutrient');
+	var rdi = require('./rdi');
+	var IU = require('./IU');
 	var Measurement = require('./Measurement');
 
 
@@ -55,7 +58,7 @@ define(function(require) {
 		{
 			title: 'Whole Oat Powder',
 			url: 'http://www.amazon.com/dp/B008QHPVO4',
-			serving: '40g',
+			serving: '1 scoop (40g)',
 			size: '8 lb',
 			price: '$27.99',
 			fat: '3.2g',
@@ -68,7 +71,7 @@ define(function(require) {
 		{
 			title: 'NOW Foods Carbo Gain Maltodextrin',
 			url: 'http://www.amazon.com/dp/B0013OUNRM/',
-			serving: '50g', // 1/2 cup
+			serving: '1/2 cup (50g)',
 			size: '8 lb',
 			price: '$23.48',
 			carbohydrate: '47g'
@@ -76,7 +79,7 @@ define(function(require) {
 		{
 			title: 'Now Foods WHEY PROTEIN',
 			url: 'http://www.amazon.com/dp/B0015AQL1Q',
-			serving: '28g',
+			serving: '1 scoop (28g)',
 			size: '5 lb',
 			price: '$59.19',
 			fat: '0.3g',
@@ -91,7 +94,7 @@ define(function(require) {
 		{
 			title: 'Casein Powder',
 			url: 'http://www.amazon.com/dp/B002PYLOX6',
-			serving: '22g',
+			serving: '1 scoop (22g)',
 			size: '4 lb',
 			price: '$51.99',
 			fat: '0.4g',
@@ -106,8 +109,8 @@ define(function(require) {
 		{
 			title: 'Fitness Fiber',
 			url: 'http://www.amazon.com/dp/B003VUHU0O',
-			serving: '1tsp',
-			size: '30tsp',
+			serving: '1tsp (6.5g)',
+			size: '195g',
 			price: '$4.89',
 			adjusted: '6tsp',
 			carbohydrate: '6g',
@@ -169,7 +172,7 @@ define(function(require) {
 			title: 'Now Foods Calcium Carbonate',
 			url: 'http://www.amazon.com/dp/B000ZL1XUK',
 			serving: '1/2 tsp (1.5g)',
-			adjusted: 1,
+			adjusted: '1 tsp',
 			size: '12oz',
 			price: '$10.23',
 			calcium: '600mg'
@@ -177,7 +180,7 @@ define(function(require) {
 		{
 			title: 'NOW Foods Magnesium Citrate Powder',
 			url: 'http://www.amazon.com/dp/B004189JCW',
-			serving: '0.5tsp (1.9g)',
+			serving: '0.5 tsp (1.9g)',
 			size: '8oz',
 			price: '$6.99',
 			magnesium: '315mg'
@@ -202,7 +205,7 @@ define(function(require) {
 		{
 			title: 'Swanson Monosodium Phosphate',
 			url: 'http://www.amazon.com/dp/B008BRBVZW',
-			serving: '1g',
+			serving: '1 scoop (1g)',
 			adjusted: '4g',
 			size: '113g',
 			price: '$3.99',
@@ -212,7 +215,7 @@ define(function(require) {
 		{
 			title: 'Jarrow Formulas MSM Sulfur Powder',
 			url: 'http://www.amazon.com/dp/B0013OVVHI',
-			serving: '1g',
+			serving: '1 scoop (1g)',
 			size: '200g',
 			price: '$10.02',
 			sulfur: '1g'
@@ -230,11 +233,13 @@ define(function(require) {
 
 
 	products.forEach(function(prod) {
-		console.log(new Measurement(prod.size).toSiBaseUnit());
-		if (prod.serving.constructor !== String) {
-			return;
-		}
-		console.log(prod.title, prod.serving.search(/g/));
+		/*
+		 *console.log(new Measurement(prod.size).toSiBaseUnit());
+		 *if (prod.serving.constructor !== String) {
+		 *    return;
+		 *}
+		 *console.log(prod.title, prod.serving.search(/g/));
+		 */
 		/*
 		 *if (prod.size) {
 		 *    return;
@@ -255,25 +260,84 @@ define(function(require) {
 
 
 	return products
-		.map(function(prod, i) {
-			prod.id = i;
+		//split into discrete sections based on keys
+		.map(function(prod) {
+			var ret = {};
+			var sections = {
+				meta: ['title', 'url', 'price'],
+				serving: ['serving', 'adjusted', 'size'],
+				nutrients: Object.keys(defaults)
+			};
+			forOwn(sections, function(sectionKeys, key) {
+				ret[key] = filter(prod, function(val, key) {
+					return sectionKeys.indexOf(key) !== -1;
+				});
+			});
+			return ret;
+		})
+		//convert strings into Measurement objects
+		.map(function(prod) {
+			prod.nutrients = map(prod.nutrients, function(val, key) {
+				if (val === null) {
+					return null;
+				}
+
+				if (val.search(/IU$/) !== -1) {
+					return new Measurement(
+						IU.toGrams(key, val.replace(/iu$/i, '')),
+						'g'
+					);
+				}
+
+				if (val.search(/%$/) !== -1) {
+					var percentage = parseFloat(val.replace('%', ''), 10);
+					var dv = rdi[key].dv;
+					return new Measurement(percentage * 0.01 * dv, 'g');
+				}
+
+				return Measurement.parse(val);
+			});
+
+			prod.serving = map(prod.serving, function(val, key) {
+				if (key === 'serving') {
+					if (!isString(val)) {
+						return [new Measurement(val, 'unit')];
+					}
+
+					//split into volume (better for display) and weight (often
+					//what product size is expressed in)
+					var matches = val.match(/(.*)\((.*)\)/);
+					if (matches) {
+						return [
+							Measurement.parse(matches[1]),
+							Measurement.parse(matches[2])
+						];
+					}
+					return [Measurement.parse(val)];
+				}
+
+				if (!isString(val)) {
+					return new Measurement(val, 'unit');
+				}
+
+				return Measurement.parse(val);
+			});
+
 			return prod;
 		})
 		.map(function(prod) {
-			return mixin({}, defaults, prod);
+			prod.nutrients = map(prod.nutrients, function(val) {
+				return val.toSiBaseUnit().qty;
+			});
+			return prod;
 		})
 		.map(function(prod) {
-			return map(prod, function(val, key) {
-				if (['id', 'title', 'url', 'price'].indexOf(key) !== -1) {
-					return val;
-				}
-
-				if (['serving', 'adjusted'].indexOf(key) !== -1) {
-					return PhysicalQuantity.parse(val);
-				}
-
-				return new Nutrient(key, val);
-			});
+			prod.nutrients = mixin({}, defaults, prod.nutrients);
+			return prod;
+		})
+		.map(function(prod, i) {
+			prod.id = i;
+			return prod;
 		});
 
 });

@@ -1,9 +1,10 @@
 define(function(require) {
 
 	var map = require('mout/object/map');
+	var isString = require('mout/lang/isString');
 
-	var PhysicalQuantity = require('./PhysicalQuantity');
-	var Units = require('./Units');
+	var IU = require('./IU');
+	var Measurement = require('./Measurement');
 
 	/*
 	 *{
@@ -183,7 +184,10 @@ define(function(require) {
 
 	return map(rdiList, function(val, key) {
 		return map(val, function(val) {
-			return PhysicalQuantity.parse(val, key);
+			if (isString(val) && val.search(/IU$/) !== -1) {
+				return IU.toGrams(key, val.replace(/iu$/i, ''));
+			}
+			return new Measurement(val).toSiBaseUnit().qty;
 		});
 	});
 });
