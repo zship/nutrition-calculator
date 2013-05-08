@@ -59,6 +59,7 @@ define(function(require) {
 			title: 'Whole Oat Powder',
 			url: 'http://www.amazon.com/dp/B008QHPVO4',
 			serving: '1 scoop (40g)',
+			adjusted: '2 scoop',
 			size: '8 lb',
 			price: '$27.99',
 			fat: '3.2g',
@@ -80,6 +81,7 @@ define(function(require) {
 			title: 'Now Foods WHEY PROTEIN',
 			url: 'http://www.amazon.com/dp/B0015AQL1Q',
 			serving: '1 scoop (28g)',
+			adjusted: '2 scoop',
 			size: '5 lb',
 			price: '$59.19',
 			fat: '0.3g',
@@ -95,6 +97,7 @@ define(function(require) {
 			title: 'Casein Powder',
 			url: 'http://www.amazon.com/dp/B002PYLOX6',
 			serving: '1 scoop (22g)',
+			adjusted: '1.5 scoop',
 			size: '4 lb',
 			price: '$51.99',
 			fat: '0.4g',
@@ -110,9 +113,9 @@ define(function(require) {
 			title: 'Fitness Fiber',
 			url: 'http://www.amazon.com/dp/B003VUHU0O',
 			serving: '1tsp (6.5g)',
+			adjusted: '6tsp',
 			size: '195g',
 			price: '$4.89',
-			adjusted: '6tsp',
 			carbohydrate: '6g',
 			fiber: '5g'
 		},
@@ -120,6 +123,7 @@ define(function(require) {
 			title: 'Walnut Oil',
 			url: 'http://www.amazon.com/dp/B001EQ5EJQ/',
 			serving: '1 tbsp (14g)',
+			adjusted: '2 tbsp',
 			size: (16.9 * 3) + 'fl oz',
 			price: '$23.97',
 			fat: '14g',
@@ -172,7 +176,7 @@ define(function(require) {
 			title: 'Now Foods Calcium Carbonate',
 			url: 'http://www.amazon.com/dp/B000ZL1XUK',
 			serving: '1/2 tsp (1.5g)',
-			adjusted: '1 tsp',
+			adjusted: '1/2 tsp',
 			size: '12oz',
 			price: '$10.23',
 			calcium: '600mg'
@@ -322,6 +326,8 @@ define(function(require) {
 
 				return Measurement.parse(val);
 			});
+
+			prod.meta.price = parseFloat(prod.meta.price.replace(/\$/, ''), 10);
 
 			return prod;
 		})

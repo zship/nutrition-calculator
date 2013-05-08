@@ -2,6 +2,7 @@ define(function(require) {
 
 	var $ = require('jquery');
 	var jade = require('jade');
+	var clone = require('mout/lang/deepClone');
 	var forOwn = require('mout/object/forOwn');
 	var isString = require('mout/lang/isString');
 	var isNumber = require('mout/lang/isNumber');
@@ -16,7 +17,7 @@ define(function(require) {
 	var tpl;
 
 	var draw = function() {
-		var adjusted = products
+		var adjusted = clone(products)
 			.map(function(prod) {
 				var entered = $('tr[data-prod="' + prod.id + '"]').find('.adjust input').val();
 				if (!entered) {
@@ -55,7 +56,7 @@ define(function(require) {
 					servingsPerUnit = prod.serving.size.toSiBaseUnit().qty / (prod.serving.adjusted.qty * volumeToWeight);
 				}
 				prod.serving.servingsPerUnit = servingsPerUnit;
-				prod.serving.pricePerServing = '$' + (parseFloat(prod.meta.price.replace(/\$/, ''), 10) / servingsPerUnit).toFixed(2);
+				prod.serving.pricePerServing = prod.meta.price / servingsPerUnit;
 
 
 				var ratio = prod.serving.adjusted.qty / prod.serving.serving[0].qty;
@@ -64,35 +65,36 @@ define(function(require) {
 					return n * ratio;
 				});
 
-				prod.nutrients.calories = prod.nutrients.protein * 4 + prod.nutrients.carbohydrate * 4 + prod.nutrients.fat * 9;
+				prod.calories = {
+					protein: prod.nutrients.protein * 4,
+					carbohydrate: prod.nutrients.carbohydrate * 4,
+					fat: prod.nutrients.fat * 9
+				};
+
+				prod.calories.total = reduce(prod.calories, function(cal, memo) {
+					return cal + memo;
+				}, 0);
 
 				return prod;
 			});
 
+
 		var total = reduce(adjusted, function(memo, prod) {
-			var ret = {};
-			forOwn(prod.nutrients, function(nutrient, key) {
-				ret[key] = nutrient + (memo[key] || 0);
+			return map(prod, function(section, sectionKey) {
+				return map(section, function(val, key) {
+					return val + (memo[sectionKey] && memo[sectionKey][key] || 0);
+				});
 			});
-			ret.pricePerServing = parseFloat(prod.serving.pricePerServing.replace(/\$/,''), 10) + (memo.pricePerServing || 0);
-			return ret;
-		}, {});
+		});
 
-		total.pricePerServing = '$' + total.pricePerServing.toFixed(2);
 
-		var errors = map(total, function(nutrient, key) {
+		var errors = map(total.nutrients, function(nutrient, key) {
 			if (!rdi[key]) {
 				return false;
 			}
-
 			if (nutrient < rdi[key].rdi) {
 				return 'low';
 			}
-			/*
-			 *if (rdi[key].dv && nutrient.qty < rdi[key].dv.asGrams()) {
-			 *    return 'mid';
-			 *}
-			 */
 			if (rdi[key].ul && nutrient > rdi[key].ul) {
 				return 'high';
 			}
@@ -116,64 +118,97 @@ define(function(require) {
 		};
 
 
-		var delta = map(total, function(nutrient, key) {
-			if (!rdi[key]) {
-				return '';
-			}
+		var delta = map(total, function(section, sectionKey) {
+			return map(section, function(val, key) {
+				if (sectionKey !== 'nutrients') {
+					return '';
+				}
+				if (!rdi[key]) {
+					return '';
+				}
 
-			var d = nutrient - rdi[key].rdi;
-			var sign = (d < 0) ? '-' : '+';
-			return sign + (new Measurement(Math.abs(d), 'g')).format();
+				var d = val - rdi[key].rdi;
+				if (d === 0) {
+					return '';
+				}
+				var sign = (d < 0) ? '-' : '+';
+				return sign + (new Measurement(Math.abs(d), 'g')).format();
+			});
 		});
 
 
-		var flattened = map(adjusted, function(prod) {
-			var ret = {};
-			ret.id = prod.id;
-			forOwn(prod, function(section, sectionKey) {
-				forOwn(section, function(val, key) {
+		adjusted = map(adjusted, function(prod) {
+			return map(prod, function(section, sectionKey) {
+				if (sectionKey === 'id') {
+					return section;
+				}
+				return map(section, function(val, key) {
 					if (!val) {
-						ret[key] = '-';
+						return '-';
 					}
 					else if (sectionKey === 'nutrients') {
-						ret[key] = doFormat(new Measurement(val, 'g'));
+						return new Measurement(val, 'g').format();
 					}
 					else if (sectionKey === 'serving') {
 						if (key === 'serving') {
-							ret[key] = val[0].format();
+							var f = val[0].format();
 							if (val[1]) {
-								ret[key] += ' (' + val[1].format() + ')';
+								f += ' (' + val[1].format() + ')';
 							}
+							return f;
 						}
 						else {
-							ret[key] = doFormat(val);
+							return doFormat(val);
 						}
 					}
 					else {
-						ret[key] = val;
+						return val;
 					}
 				});
 			});
-			return ret;
 		});
 
 
-		var html = tpl({
-			products: flattened,
-			rdi: map(rdi, function(obj, key) {
-				return doFormat(obj.rdi, key);
-			}),
-			ul: map(rdi, function(obj, key) {
-				if (!obj.ul) {
+		var formatted = {
+			products: adjusted,
+			rdi: {
+				meta: {},
+				serving: {},
+				calories: {},
+				nutrients: map(rdi, function(obj) {
+					return new Measurement(obj.rdi, 'g').format();
+				}),
+			},
+			ul: {
+				meta: {},
+				serving: {},
+				calories: {},
+				nutrients: map(rdi, function(obj) {
+					if (!obj.ul) {
+						return '';
+					}
+					return new Measurement(obj.ul, 'g').format();
+				}),
+			},
+			total: map(total, function(section, sectionKey) {
+				return map(section, function(val, key) {
+					if (sectionKey === 'nutrients') {
+						if (['protein', 'carbohydrate', 'fat'].indexOf(key) !== -1) {
+							return (100 * total.calories[key] / total.calories.total).toFixed(1) + '%';
+						}
+						return new Measurement(val, 'g').format();
+					}
+					if (sectionKey === 'calories') {
+						return val.toFixed(1);
+					}
 					return '';
-				}
-				return doFormat(obj.ul, key);
+				});
 			}),
-			total: map(total, doFormat),
 			delta: delta,
 			errors: errors
-		});
-		$('body').html(html);
+		};
+
+		$('body').html(tpl(formatted));
 
 		$('td').each(function() {
 			var className = $(this).attr('class');
