@@ -8,18 +8,38 @@ define(function(require) {
 	var isNumber = require('mout/lang/isNumber');
 	var map = require('mout/object/map');
 	var reduce = require('mout/object/reduce');
+	var parallel = require('deferreds/parallel');
 
 	var Measurement = require('./Measurement');
 	var products = require('./products');
 	var rdi = require('./rdi');
 
 
-	var tpl;
+	var _scrollbarWidth = (function() {
+		var measure = $('<div></div>').css({
+			width: 100,
+			height: 100,
+			overflow: 'scroll',
+			position: 'absolute',
+			top: -9999
+		}).appendTo('body');
+		var ret = measure[0].offsetWidth - measure[0].clientWidth;
+		measure.remove();
+		return ret;
+	})();
+
+
+	var mainTpl;
+	var breakdownTpl;
+
+	var opts = {
+		subtractFiber: true
+	};
 
 	var draw = function() {
 		var adjusted = clone(products)
 			.map(function(prod) {
-				var entered = $('tr[data-prod="' + prod.id + '"]').find('.adjust input').val();
+				var entered = $('.e tr[data-prod="' + prod.id + '"]').first().find('.adjust input').val();
 				if (!entered) {
 					return prod;
 				}
@@ -65,6 +85,12 @@ define(function(require) {
 					return n * ratio;
 				});
 
+				if (opts.subtractFiber) {
+					if (prod.nutrients.fiber && prod.nutrients.carbohydrate) {
+						prod.nutrients.carbohydrate -= prod.nutrients.fiber;
+					}
+				}
+
 				prod.calories = {
 					protein: prod.nutrients.protein * 4,
 					carbohydrate: prod.nutrients.carbohydrate * 4,
@@ -86,6 +112,12 @@ define(function(require) {
 				});
 			});
 		});
+
+		total.percentage = {
+			protein: (100 * total.calories.protein / total.calories.total),
+			carbohydrate: (100 * total.calories.carbohydrate / total.calories.total),
+			fat: (100 * total.calories.fat / total.calories.total)
+		};
 
 
 		var errors = map(total.nutrients, function(nutrient, key) {
@@ -191,15 +223,15 @@ define(function(require) {
 				}),
 			},
 			total: map(total, function(section, sectionKey) {
-				return map(section, function(val, key) {
+				return map(section, function(val) {
 					if (sectionKey === 'nutrients') {
-						if (['protein', 'carbohydrate', 'fat'].indexOf(key) !== -1) {
-							return (100 * total.calories[key] / total.calories.total).toFixed(1) + '%';
-						}
 						return new Measurement(val, 'g').format();
 					}
 					if (sectionKey === 'calories') {
 						return val.toFixed(1);
+					}
+					if (sectionKey === 'percentage') {
+						return val.toFixed(1) + '%';
 					}
 					return '';
 				});
@@ -208,27 +240,84 @@ define(function(require) {
 			errors: errors
 		};
 
-		$('body').html(tpl(formatted));
+		var html = $(mainTpl(formatted));
 
-		$('td').each(function() {
+		html.find('td').each(function() {
 			var className = $(this).attr('class');
 			if (errors[className]) {
 				$(this).addClass(errors[className]);
 			}
 		});
 
+		$('#main-content').html(html.clone());
+
+		var widths = $('#main-content tr:first th').map(function() {
+			return $(this).outerWidth();
+		}).toArray();
+		var heights = $('#main-content').find('th:first-child, td:first-child').map(function() {
+			return $(this).height();
+		});
+
+		var colgroup = $('<colgroup></colgroup>');
+		widths.forEach(function(width) {
+			colgroup.append($('<col>').css('width', width));
+		});
+		var fullWidth = widths.reduce(function(memo, width) {
+			return width + memo;
+		}, 0);
+
+		$('.table-slice-wrapper').remove();
+		var wrapper = $('<div></div>').addClass('table-slice-wrapper');
+		['nw', 'ne', 'w', 'e', 'sw', 'se'].forEach(function(direction) {
+			var slice = $('<div></div>').addClass('table-slice ' + direction);
+			slice.html(html.clone());
+			slice.find('table').prepend(colgroup.clone());
+			slice.find('table').css({
+				'table-layout': 'fixed',
+				'width': fullWidth
+			});
+			wrapper.append(slice);
+		});
+
+		var firstWidth = colgroup.find('col').first().outerWidth();
+		wrapper.find('.table-slice.nw').css('width', firstWidth);
+		wrapper.find('.table-slice.w').css('width', firstWidth);
+		wrapper.find('.table-slice.sw').css('width', firstWidth);
+		wrapper.find('.table-slice.w').css('bottom', _scrollbarWidth);
+		wrapper.find('.table-slice.sw').css('bottom', _scrollbarWidth);
+		wrapper.find('.table-slice.se').css('bottom', _scrollbarWidth);
+		wrapper.find('.table-slice.ne').css('right', _scrollbarWidth);
+		wrapper.find('.table-slice.se').css('right', _scrollbarWidth);
+
+		$('body').append(wrapper);
+
+		html = breakdownTpl({total: formatted.total});
+		$('#breakdown').html(html);
+
 		$('.adjust input').on('change', function() {
 			draw();
+		});
+
+		$('.table-slice.e').on('scroll', function() {
+			$('.table-slice.w')[0].scrollTop = this.scrollTop;
+			$('.table-slice.ne')[0].scrollLeft = this.scrollLeft;
+			$('.table-slice.se')[0].scrollLeft = this.scrollLeft;
 		});
 	};
 
 
-	$.ajax({
-		url: 'tpl.jade',
-		async: false,
-		dataType: 'text'
-	}).then(function(response) {
-		tpl = jade.compile(response);
+	parallel(
+		$.ajax({
+			url: 'tpl.jade',
+			dataType: 'text'
+		}),
+		$.ajax({
+			url: 'breakdown.jade',
+			dataType: 'text'
+		})
+	).then(function(mainText, breakdownText) {
+		mainTpl = jade.compile(mainText);
+		breakdownTpl = jade.compile(breakdownText);
 		draw();
 	});
 

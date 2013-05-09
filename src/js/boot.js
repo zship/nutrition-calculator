@@ -6,6 +6,7 @@ require.config({
 		'require': './require.js',
 		'jquery': 'https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min',
 		'mout': 'lib/mout/src',
+		'deferreds': 'lib/deferreds/src/deferreds',
 		'jade': 'lib/jade/jade'
 	},
 

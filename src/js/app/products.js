@@ -73,6 +73,7 @@ define(function(require) {
 			title: 'NOW Foods Carbo Gain Maltodextrin',
 			url: 'http://www.amazon.com/dp/B0013OUNRM/',
 			serving: '1/2 cup (50g)',
+			adjusted: '1 cup',
 			size: '8 lb',
 			price: '$23.48',
 			carbohydrate: '47g'
@@ -81,7 +82,7 @@ define(function(require) {
 			title: 'Now Foods WHEY PROTEIN',
 			url: 'http://www.amazon.com/dp/B0015AQL1Q',
 			serving: '1 scoop (28g)',
-			adjusted: '2 scoop',
+			adjusted: '3 scoop',
 			size: '5 lb',
 			price: '$59.19',
 			fat: '0.3g',
@@ -119,11 +120,23 @@ define(function(require) {
 			carbohydrate: '6g',
 			fiber: '5g'
 		},
+		/*
+		 *{
+		 *    title: 'Myogenix Pro FIBER',
+		 *    url: 'http://www.amazon.com/dp/B002ZNLQK8',
+		 *    serving: '1 scoop (10g)',
+		 *    adjusted: '4 scoop',
+		 *    size: '500g',
+		 *    price: '$20.02',
+		 *    carbohydrate: '9g',
+		 *    fiber: '9g'
+		 *},
+		 */
 		{
 			title: 'Walnut Oil',
 			url: 'http://www.amazon.com/dp/B001EQ5EJQ/',
 			serving: '1 tbsp (14g)',
-			adjusted: '2 tbsp',
+			adjusted: '3 tbsp',
 			size: (16.9 * 3) + 'fl oz',
 			price: '$23.97',
 			fat: '14g',

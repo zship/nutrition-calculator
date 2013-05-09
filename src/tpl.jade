@@ -3,14 +3,11 @@ mixin nutrientRow(obj, title)
 		td= title
 	else
 		td
-			a(href=obj.url)= obj.meta.title
+			a(href=obj.meta.url)= obj.meta.title
 	td.serving= obj.serving.serving
 	td.adjust
 		input(type='text', value=obj.serving.adjusted)
-	td.price= obj.meta.price
 	td.size= obj.serving.size
-	td.servingsPerUnit= obj.serving.servingsPerUnit
-	td.pricePerServing= obj.serving.pricePerServing
 	td.calories= obj.calories.total
 	td.protein= obj.nutrients.protein
 	td.carbohydrate= obj.nutrients.carbohydrate
@@ -46,6 +43,9 @@ mixin nutrientRow(obj, title)
 	td.selenium= obj.nutrients.selenium
 	td.sodium= obj.nutrients.sodium
 	td.zinc= obj.nutrients.zinc
+	td.price= obj.meta.price
+	td.servingsPerUnit= obj.serving.servingsPerUnit
+	td.pricePerServing= obj.serving.pricePerServing
 
 table
 	thead
@@ -53,10 +53,7 @@ table
 			th Item
 			th Serving
 			th Adjust
-			th Price
 			th Size
-			th Servings/Unit
-			th Price/Serving
 			th Calories
 			th Protein
 			th Carbs
@@ -92,6 +89,9 @@ table
 			th Selenium
 			th Sodium
 			th Zinc
+			th Price
+			th Servings/Unit
+			th Price/Serving
 	tbody
 		each prod in products
 			tr(data-prod=prod.id)

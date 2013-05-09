@@ -2,55 +2,218 @@ body {
 	font-family: 'Open Sans';
 }
 
-th, td {
-	white-space: nowrap;
-	padding: 5px 10px;
+@sticky-width: 300px;
+@left-width: 300px;
+
+.table-slice-wrapper {
+	.table-slice {
+		overflow: hidden;
+
+		&.nw,
+		&.ne
+		{
+			position: absolute;
+			z-index: 2;
+			top: 0;
+			left: 0;
+
+			tbody, tfoot {
+				display: none;
+			}
+		}
+
+		&.w,
+		&.e
+		{
+			position: absolute;
+			z-index: 1;
+			top: 0;
+			left: 0;
+			bottom: 0;
+		}
+
+		&.sw,
+		&.se
+		{
+			position: absolute;
+			z-index: 2;
+			bottom: 0;
+			left: 0;
+
+			thead, tbody {
+				display: none;
+			}
+		}
+
+		&.nw,
+		&.w,
+		&.sw
+		{
+			width: @left-width;
+		}
+
+		&.ne,
+		&.e,
+		&.se
+		{
+			right: 0;
+		}
+
+		&.nw { z-index: 3; }
+		&.ne { z-index: 2; }
+		&.w {  z-index: 2; }
+		&.e {  z-index: 1; }
+		&.sw { z-index: 3; }
+		&.se { z-index: 2; }
+
+		&.e {
+			overflow: auto;
+		}
+
+	}
+
+	table {
+		table-layout: fixed;
+	}
 }
 
-th {
-	font-weight: 600;
-}
-
-thead {
-	background: rgba(0, 0, 0, 0.8);
-	color: #efefef;
-}
-
-tbody {
-	color: #555;
-
-	tr:nth-child(even) {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	td:nth-child(even) {
-		background: rgba(0, 0, 0, 0.03);
+.table-slice-wrapper {
+	.table-slice {
+		&.nw,
+		&.w,
+		&.sw
+		{
+			border-right: 1px solid #999;
+		}
 	}
 }
 
-tbody, tfoot {
-	td.low {
-		background: rgba(255, 0, 0, 0.2);
+#main-content {
+	position: absolute;
+	top: -999999px;
+	left: -999999px;
+}
+
+#main-content,
+.table-slice
+{
+	background-color: #fff;
+
+	input[type="text"] {
+		width: 150px;
+		padding: 2px;
+		border-radius: 5px;
+		border: 1px solid #ccc;
+
+		&:hover {
+			border: 1px solid #999;
+		}
+
+		&:focus {
+			border: 1px solid #555;
+		}
 	}
 
-	td.mid {
-		background: rgba(255, 255, 0, 0.2);
+	th, td {
+		white-space: nowrap;
+		padding: 5px 10px;
 	}
 
-	td.high {
-		background: rgba(255, 0, 0, 0.4);
+	th {
+		font-weight: 600;
 	}
 
-	tr.rdi td.low {
-		color: rgb(255, 0, 0);
+	thead {
+		background: rgba(0, 0, 0, 0.8);
+		color: #efefef;
 	}
 
-	tr.ul td.high {
-		color: rgb(255, 0, 0);
+	tbody {
+		color: #555;
+
+		tr:nth-child(even) {
+			background: rgba(0, 0, 0, 0.05);
+		}
+
+		td:nth-child(even) {
+			background: rgba(0, 0, 0, 0.03);
+		}
+	}
+
+	tbody, tfoot {
+		td.low {
+			background: rgba(255, 0, 0, 0.2);
+		}
+
+		td.mid {
+			background: rgba(255, 255, 0, 0.2);
+		}
+
+		td.high {
+			background: rgba(255, 0, 0, 0.4);
+		}
+
+		tr.rdi td.low {
+			color: rgb(255, 0, 0);
+		}
+
+		tr.ul td.high {
+			color: rgb(255, 0, 0);
+		}
+	}
+
+	td:first-child {
+		border-right: 1px solid #999;
+	}
+
+	tfoot {
+		border-top: 1px solid #999;
+		/*border-bottom: 1px solid #555;*/
+
+		.adjust input {
+			display: none;
+		}
 	}
 }
 
-tfoot {
-	border-top: 1px solid #999;
-	border-bottom: 1px solid #555;
+
+#breakdown {
+	position: absolute;
+	z-index: 5;
+	bottom: 10px;
+	left: 10px;
+
+	th, td {
+		padding: 5px 10px;
+	}
+
+	th {
+		text-align: right;
+	}
+
+	.calories,
+	.protein,
+	.carbohydrate,
+	.fat
+	{
+		font-weight: bold;
+		color: #fff;
+	}
+
+	.calories {
+		background-color: #555;
+	}
+
+	.protein {
+		background-color: rgb(188, 95, 84);
+	}
+
+	.carbohydrate {
+		background-color: rgb(75, 184, 154);
+	}
+
+	.fat {
+		background-color: rgb(228, 177, 1);
+	}
+
 }
