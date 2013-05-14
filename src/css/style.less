@@ -1,3 +1,9 @@
+@import 'flexbox.less';
+
+* {
+	box-sizing: border-box;
+}
+
 body {
 	font-family: 'Open Sans';
 }
@@ -30,6 +36,10 @@ body {
 			top: 0;
 			left: 0;
 			bottom: 0;
+
+			thead, tfoot {
+				visibility: hidden;
+			}
 		}
 
 		&.sw,
@@ -49,7 +59,7 @@ body {
 		&.w,
 		&.sw
 		{
-			width: @left-width;
+			/*width: @left-width;*/
 		}
 
 		&.ne,
@@ -84,6 +94,12 @@ body {
 		&.sw
 		{
 			border-right: 1px solid #999;
+		}
+
+		&.sw,
+		&.se
+		{
+			border-top: 1px solid #999;
 		}
 	}
 }
@@ -140,6 +156,18 @@ body {
 		}
 	}
 
+	tfoot {
+		background: rgba(0, 0, 0, 0.1);
+
+		tr:nth-child(even) {
+			background: rgba(0, 0, 0, 0.05);
+		}
+
+		td:nth-child(even) {
+			background: rgba(0, 0, 0, 0.03);
+		}
+	}
+
 	tbody, tfoot {
 		td.low {
 			background: rgba(255, 0, 0, 0.2);
@@ -162,14 +190,7 @@ body {
 		}
 	}
 
-	td:first-child {
-		border-right: 1px solid #999;
-	}
-
 	tfoot {
-		border-top: 1px solid #999;
-		/*border-bottom: 1px solid #555;*/
-
 		.adjust input {
 			display: none;
 		}
@@ -178,26 +199,65 @@ body {
 
 
 #breakdown {
+	@pad: 5px;
+	@border: 2px;
+
+	.flexbox();
+	.flex-direction(column);
 	position: absolute;
 	z-index: 5;
-	bottom: 10px;
-	left: 10px;
+	bottom: 0;
+	left: 0;
 
-	th, td {
-		padding: 5px 10px;
-	}
+	font-weight: bold;
+	color: #fff;
 
-	th {
-		text-align: right;
+	h4 {
+		display: inline-block;
+		margin: 0;
 	}
 
 	.calories,
-	.protein,
-	.carbohydrate,
-	.fat
 	{
-		font-weight: bold;
-		color: #fff;
+		.flex(1);
+		padding: @pad;
+		border-bottom: @border solid #fff;
+
+		.qty {
+			float: right;
+			font-size: 20px;
+		}
+	}
+
+	.nutrients {
+		.flexbox();
+		.flex(2);
+
+		.protein,
+		.carbohydrate,
+		.fat {
+			.flex(1);
+			display: inline-block;
+			position: relative;
+			padding: @pad;
+			border-right: @border solid #fff;
+
+			.qty {
+				position: absolute;
+				top: @pad;
+				right: @pad;
+			}
+
+			.percentage {
+				display: block;
+				font-size: 28px;
+				text-align: center;
+			}
+		}
+
+		:last-child {
+			border-right: 0 none;
+		}
 	}
 
 	.calories {
@@ -216,4 +276,12 @@ body {
 		background-color: rgb(228, 177, 1);
 	}
 
+}
+
+x-target-picker {
+	display: block;
+
+	x-option {
+		display: block;
+	}
 }

@@ -8,7 +8,8 @@
 	"dependencies": {
 		"mout": "0.3.x",
 		"deferreds": "0.2.x",
-		"jade": "0.27.x"
+		"jade": "0.27.x",
+		"document.register": "git://github.com/mozilla/web-components.git"
 	},
 	"devDependencies": {
 		"grunt": "0.4.x",

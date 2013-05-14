@@ -3,7 +3,6 @@ define(function(require) {
 	var $ = require('jquery');
 	var jade = require('jade');
 	var clone = require('mout/lang/deepClone');
-	var forOwn = require('mout/object/forOwn');
 	var isString = require('mout/lang/isString');
 	var isNumber = require('mout/lang/isNumber');
 	var map = require('mout/object/map');
@@ -13,6 +12,8 @@ define(function(require) {
 	var Measurement = require('./Measurement');
 	var products = require('./products');
 	var rdi = require('./rdi');
+
+	require('./view/TargetPicker');
 
 
 	var _scrollbarWidth = (function() {
@@ -178,6 +179,9 @@ define(function(require) {
 					if (!val) {
 						return '-';
 					}
+					else if (key === 'price' || key === 'pricePerServing') {
+						return val.toFixed(2);
+					}
 					else if (sectionKey === 'nutrients') {
 						return new Measurement(val, 'g').format();
 					}
@@ -223,15 +227,18 @@ define(function(require) {
 				}),
 			},
 			total: map(total, function(section, sectionKey) {
-				return map(section, function(val) {
+				return map(section, function(val, key) {
 					if (sectionKey === 'nutrients') {
 						return new Measurement(val, 'g').format();
 					}
 					if (sectionKey === 'calories') {
-						return val.toFixed(1);
+						return val.toFixed(0);
 					}
 					if (sectionKey === 'percentage') {
 						return val.toFixed(1) + '%';
+					}
+					if (key === 'pricePerServing') {
+						return val.toFixed(2);
 					}
 					return '';
 				});
@@ -255,8 +262,16 @@ define(function(require) {
 			return $(this).outerWidth();
 		}).toArray();
 		var heights = $('#main-content').find('th:first-child, td:first-child').map(function() {
-			return $(this).height();
+			return $(this).outerHeight();
+		}).toArray();
+
+		$('#main-content').hide();
+
+		heights.forEach(function(height, i) {
+			$('#main-content').find('tr').eq(i).css('height', height);
 		});
+
+		$('#main-content').show();
 
 		var colgroup = $('<colgroup></colgroup>');
 		widths.forEach(function(width) {
@@ -270,7 +285,7 @@ define(function(require) {
 		var wrapper = $('<div></div>').addClass('table-slice-wrapper');
 		['nw', 'ne', 'w', 'e', 'sw', 'se'].forEach(function(direction) {
 			var slice = $('<div></div>').addClass('table-slice ' + direction);
-			slice.html(html.clone());
+			slice.html($('#main-content table').clone());
 			slice.find('table').prepend(colgroup.clone());
 			slice.find('table').css({
 				'table-layout': 'fixed',
@@ -279,10 +294,33 @@ define(function(require) {
 			wrapper.append(slice);
 		});
 
-		var firstWidth = colgroup.find('col').first().outerWidth();
-		wrapper.find('.table-slice.nw').css('width', firstWidth);
-		wrapper.find('.table-slice.w').css('width', firstWidth);
-		wrapper.find('.table-slice.sw').css('width', firstWidth);
+		[
+			{
+				sections: ['nw', 'w', 'sw'],
+				remove: [
+					'th:not(:first-child)',
+					'td:not(:first-child)',
+					'col:not(:first-child)'
+				]
+			},
+			{
+				sections: ['nw', 'ne'],
+				remove: [
+					'tbody',
+					'tfoot'
+				]
+			}
+		].forEach(function(obj) {
+			obj.sections.forEach(function(section) {
+				var slice = wrapper.find('.table-slice.' + section);
+				obj.remove.forEach(function(selector) {
+					slice.find(selector).remove();
+				});
+			});
+		});
+
+		wrapper.find('.table-slice.nw, .table-slice.w, .table-slice.sw').find('table').css('width', 'auto');
+
 		wrapper.find('.table-slice.w').css('bottom', _scrollbarWidth);
 		wrapper.find('.table-slice.sw').css('bottom', _scrollbarWidth);
 		wrapper.find('.table-slice.se').css('bottom', _scrollbarWidth);
@@ -292,6 +330,10 @@ define(function(require) {
 		$('body').append(wrapper);
 
 		html = breakdownTpl({total: formatted.total});
+		$('#breakdown').css({
+			width: $('.table-slice.sw').outerWidth(),
+			height: $('.table-slice.sw').outerHeight()
+		});
 		$('#breakdown').html(html);
 
 		$('.adjust input').on('change', function() {
