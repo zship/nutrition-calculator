@@ -14,10 +14,10 @@ require.config({
 	shim: {
 		'jquery': {
 			exports: '$'
-		},
-		'jade': {
-			exports: 'jade'
 		}
+		//'jade': {
+			//exports: 'jade'
+		//}
 	}
 
 });

@@ -8,8 +8,10 @@
 	"dependencies": {
 		"mout": "0.3.x",
 		"deferreds": "0.2.x",
+		"less": "1.3.x",
 		"jade": "0.27.x",
-		"document.register": "git://github.com/mozilla/web-components.git"
+		"document.register": "git://github.com/mozilla/web-components.git",
+		"require-jade": "git://github.com/rocketlabsdev/require-jade.git"
 	},
 	"devDependencies": {
 		"grunt": "0.4.x",

@@ -1,5 +1,7 @@
 define(function(require) {
 
+	var tpl = require('jade!./TargetPicker');
+	var $ = require('jquery');
 	require('document.register');
 
 
@@ -10,12 +12,15 @@ define(function(require) {
 
 
 	TargetPicker.prototype.readyCallback = function() {
+		var $el = $(this);
+		var active = $el.find('x-option').first().text();
+		this.innerHTML = tpl({active: active});
 		//console.log(this);
 	};
 
 
 	TargetPicker.prototype.insertedCallback = function() {
-		console.log('here');
+		//console.log('here');
 	};
 
 

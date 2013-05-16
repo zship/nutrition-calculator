@@ -1,0 +1,57 @@
+@import "lesshat";
+
+x-target-picker {
+	@h: 30px;
+	@pad: 5px;
+	@arrow-width: 30px;
+
+	.blue {
+		.gradient(~'linear-gradient(180deg, rgb(185, 224, 245) 0%, rgb(146, 189, 214) 100%)');
+		/*.gradient(~"linear-gradient(90deg, #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%)");*/
+	}
+
+	display: block;
+	position: relative;
+	height: @h;
+	min-width: 100px;
+	padding-right: @arrow-width + @pad;
+
+	.active,
+	.arrow
+	{
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		border: 1px solid rgba(0, 0, 0, 0.3);
+		padding: @pad;
+		.background-clip(border-box);
+	}
+
+	.active {
+		left: 0;
+		right: @arrow-width;
+		background: rgba(255, 255, 255, 0.8);
+		border-right: 0 none;
+		.border-radius(3px 0 0 3px);
+	}
+
+	.arrow {
+		.blue;
+
+		right: 0;
+		width: @arrow-width;
+		.border-radius(0 3px 3px 0);
+		color: rgba(0, 0, 0, 0.5);
+		text-shadow: 1px 1px rgba(255, 255, 255, 0.4);
+		text-align: center;
+
+		i {
+			position: relative;
+			top: -1px;
+		}
+	}
+
+	x-option {
+		display: block;
+	}
+}

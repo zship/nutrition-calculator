@@ -46,9 +46,88 @@ mixin nutrientRow(obj, title)
 	td.price= obj.meta.price
 	td.servingsPerUnit= obj.serving.servingsPerUnit
 	td.pricePerServing= obj.serving.pricePerServing
+
+
+mixin targetPicker(obj)
+	x-target-picker
+		each val in obj
+			x-option=val
+
+
+mixin targetRow(obj, title)
 	td
-		x-target-picker
-			x-option test
+	td.serving
+	td.adjust
+	td.size
+	td.calories
+	td.protein
+	td.carbohydrate
+	td.fat
+	td.omega3
+		mixin targetPicker(obj.omega3)
+	td.omega6
+		mixin targetPicker(obj.omega6)
+	td.fiber
+		mixin targetPicker(obj.fiber)
+	td.a
+		mixin targetPicker(obj.a)
+	td.thiamin
+		mixin targetPicker(obj.thiamin)
+	td.riboflavin
+		mixin targetPicker(obj.riboflavin)
+	td.niacin
+		mixin targetPicker(obj.niacin)
+	td.b6
+		mixin targetPicker(obj.b6)
+	td.b12
+		mixin targetPicker(obj.b12)
+	td.folate
+		mixin targetPicker(obj.folate)
+	td.pantothenic
+		mixin targetPicker(obj.pantothenic)
+	td.biotin
+		mixin targetPicker(obj.biotin)
+	td.choline
+		mixin targetPicker(obj.choline)
+	td.c
+		mixin targetPicker(obj.c)
+	td.d
+		mixin targetPicker(obj.d)
+	td.e
+		mixin targetPicker(obj.e)
+	td.k
+		mixin targetPicker(obj.k)
+	td.calcium
+		mixin targetPicker(obj.calcium)
+	td.chromium
+		mixin targetPicker(obj.chromium)
+	td.copper
+		mixin targetPicker(obj.copper)
+	td.flouride
+	td.iodine
+		mixin targetPicker(obj.iodine)
+	td.iron
+		mixin targetPicker(obj.iron)
+	td.magnesium
+		mixin targetPicker(obj.magnesium)
+	td.manganese
+		mixin targetPicker(obj.manganese)
+	td.molybdenum
+		mixin targetPicker(obj.molybdenum)
+	td.phosphorus
+		mixin targetPicker(obj.phosphorus)
+	td.potassium
+		mixin targetPicker(obj.potassium)
+	td.selenium
+		mixin targetPicker(obj.selenium)
+	td.sodium
+		mixin targetPicker(obj.sodium)
+	td.zinc
+		mixin targetPicker(obj.zinc)
+	td.price
+	td.servingsPerUnit
+	td.pricePerServing
+
 
 table
 	thead
@@ -104,8 +183,8 @@ table
 		tr.total
 			mixin nutrientRow(total, 'Total')
 		tr.delta
-			mixin nutrientRow(delta, '+/- RDI')
+			mixin nutrientRow(delta, '+/- Target')
 		tr.rdi
-			mixin nutrientRow(rdi, 'RDI')
+			mixin targetRow(targets, 'Target')
 		tr.ul
-			mixin nutrientRow(ul, 'UL')
+			mixin nutrientRow(ul, 'Upper Limit')

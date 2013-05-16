@@ -1,17 +1,20 @@
 define(function(require) {
 
 	var $ = require('jquery');
-	var jade = require('jade');
+	//var jade = require('jade');
 	var clone = require('mout/lang/deepClone');
 	var isString = require('mout/lang/isString');
 	var isNumber = require('mout/lang/isNumber');
 	var map = require('mout/object/map');
 	var reduce = require('mout/object/reduce');
-	var parallel = require('deferreds/parallel');
+	//var parallel = require('deferreds/parallel');
 
 	var Measurement = require('./Measurement');
 	var products = require('./products');
 	var rdi = require('./rdi');
+
+	var mainTpl = require('jade!./view/tpl');
+	var breakdownTpl = require('jade!./view/breakdown');
 
 	require('./view/TargetPicker');
 
@@ -29,9 +32,6 @@ define(function(require) {
 		return ret;
 	})();
 
-
-	var mainTpl;
-	var breakdownTpl;
 
 	var opts = {
 		subtractFiber: true
@@ -207,6 +207,7 @@ define(function(require) {
 
 		var formatted = {
 			products: adjusted,
+			targets: rdi,
 			rdi: {
 				meta: {},
 				serving: {},
@@ -347,20 +348,26 @@ define(function(require) {
 		});
 	};
 
-
-	parallel(
-		$.ajax({
-			url: 'tpl.jade',
-			dataType: 'text'
-		}),
-		$.ajax({
-			url: 'breakdown.jade',
-			dataType: 'text'
-		})
-	).then(function(mainText, breakdownText) {
-		mainTpl = jade.compile(mainText);
-		breakdownTpl = jade.compile(breakdownText);
+	$(document).ready(function() {
 		draw();
 	});
+
+
+	/*
+	 *parallel(
+	 *    $.ajax({
+	 *        url: 'js/app/view/tpl.jade',
+	 *        dataType: 'text'
+	 *    }),
+	 *    $.ajax({
+	 *        url: 'js/app/view/breakdown.jade',
+	 *        dataType: 'text'
+	 *    })
+	 *).then(function(mainText, breakdownText) {
+	 *    mainTpl = jade.compile(mainText);
+	 *    breakdownTpl = jade.compile(breakdownText);
+	 *    draw();
+	 *});
+	 */
 
 });
