@@ -144,38 +144,72 @@ define(function(require) {
 			omega6: '7.194g'
 		},
 		{
-			title: 'Nature\'s Way Alive! Liquid',
-			url: 'http://www.amazon.com/dp/B0019I8NXS',
-			serving: '2tbsp',
-			size: '30 fl oz',
-			//size: '887mL',
+			title: 'Nature\'s Way Alive!',
+			url: 'http://www.amazon.com/dp/B0009F3RO2',
+			serving: 3,
+			size: 180,
 			price: '$19.09',
-			a: '10000IU',
-			c: '500mg',
-			d: '400IU',
+			a: '15000IU',
+			c: '1000mg',
+			d: '1000IU',
 			e: '200IU',
 			k: '80ug',
 			thiamin: '25mg',
 			riboflavin: '25mg',
-			niacin: '20mg',
+			niacin: '125mg',
 			b6: '50mg',
 			folate: '400ug',
 			b12: '200ug',
-			biotin: '300ug',
+			biotin: '325ug',
 			pantothenic: '125mg',
-			calcium: '100mg',
-			iron: '450ug',
+			calcium: '250mg',
+			iron: '18mg',
 			iodine: '150ug',
-			magnesium: '40mg',
+			magnesium: '125mg',
 			zinc: '15mg',
-			selenium: '70ug',
+			selenium: '200ug',
 			copper: '2mg',
-			manganese: '4mg',
-			chromium: '120ug',
+			manganese: '5mg',
+			chromium: '250ug',
 			molybdenum: '75ug',
-			sodium: '10mg',
+			sodium: '15mg',
 			potassium: '50mg'
 		},
+		/*
+		 *{
+		 *    title: 'Nature\'s Way Alive! Liquid',
+		 *    url: 'http://www.amazon.com/dp/B0019I8NXS',
+		 *    serving: '2tbsp',
+		 *    size: '30 fl oz',
+		 *    //size: '887mL',
+		 *    price: '$19.09',
+		 *    a: '10000IU',
+		 *    c: '500mg',
+		 *    d: '400IU',
+		 *    e: '200IU',
+		 *    k: '80ug',
+		 *    thiamin: '25mg',
+		 *    riboflavin: '25mg',
+		 *    niacin: '20mg',
+		 *    b6: '50mg',
+		 *    folate: '400ug',
+		 *    b12: '200ug',
+		 *    biotin: '300ug',
+		 *    pantothenic: '125mg',
+		 *    calcium: '100mg',
+		 *    iron: '450ug',
+		 *    iodine: '150ug',
+		 *    magnesium: '40mg',
+		 *    zinc: '15mg',
+		 *    selenium: '70ug',
+		 *    copper: '2mg',
+		 *    manganese: '4mg',
+		 *    chromium: '120ug',
+		 *    molybdenum: '75ug',
+		 *    sodium: '10mg',
+		 *    potassium: '50mg'
+		 *},
+		 */
 		{
 			title: 'Lecithin Granules',
 			url: 'http://www.amazon.com/dp/B0001TRQY8',
@@ -198,15 +232,17 @@ define(function(require) {
 			adjusted: '8 tsp',
 			potassium: '540mg'
 		},
-		{
-			title: 'Now Foods Calcium Carbonate',
-			url: 'http://www.amazon.com/dp/B000ZL1XUK',
-			serving: '1/2 tsp (1.5g)',
-			adjusted: '1/2 tsp',
-			size: '12oz',
-			price: '$10.23',
-			calcium: '600mg'
-		},
+		/*
+		 *{
+		 *    title: 'Now Foods Calcium Carbonate',
+		 *    url: 'http://www.amazon.com/dp/B000ZL1XUK',
+		 *    serving: '1/2 tsp (1.5g)',
+		 *    adjusted: '1/2 tsp',
+		 *    size: '12oz',
+		 *    price: '$10.23',
+		 *    calcium: '600mg'
+		 *},
+		 */
 		{
 			title: 'NOW Foods Magnesium Citrate Powder',
 			url: 'http://www.amazon.com/dp/B004189JCW',
@@ -215,28 +251,32 @@ define(function(require) {
 			price: '$6.99',
 			magnesium: '315mg'
 		},
-		{
-			title: 'NOW Foods Iron',
-			url: 'http://www.amazon.com/dp/B000WQDD2O',
-			serving: 1,
-			size: 120,
-			price: '$7.78',
-			iron: '18mg'
-		},
-		{
-			title: 'Nature\'s Way Choline',
-			url: 'http://www.amazon.com/dp/B00024CRC8',
-			serving: 1,
-			adjusted: 2,
-			size: 100,
-			price: '$9.17',
-			choline: '500mg'
-		},
+		/*
+		 *{
+		 *    title: 'NOW Foods Iron',
+		 *    url: 'http://www.amazon.com/dp/B000WQDD2O',
+		 *    serving: 1,
+		 *    size: 120,
+		 *    price: '$7.78',
+		 *    iron: '18mg'
+		 *},
+		 */
+		/*
+		 *{
+		 *    title: 'Nature\'s Way Choline',
+		 *    url: 'http://www.amazon.com/dp/B00024CRC8',
+		 *    serving: 1,
+		 *    adjusted: 2,
+		 *    size: 100,
+		 *    price: '$9.17',
+		 *    choline: '500mg'
+		 *},
+		 */
 		{
 			title: 'Swanson Monosodium Phosphate',
 			url: 'http://www.amazon.com/dp/B008BRBVZW',
 			serving: '1 scoop (1g)',
-			adjusted: '4g',
+			adjusted: '2 scoop',
 			size: '113g',
 			price: '$3.99',
 			phosphorus: '250mg',
